@@ -1,0 +1,5 @@
+.DS_Store
+lpo_samples
+lpo_samples.tar.gz
+**/__pycache__
+.ipynb_checkpoints
