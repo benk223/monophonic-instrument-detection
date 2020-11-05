@@ -4,15 +4,25 @@ import os
 
 data_dir = 'data'
 
-def get_features(sample):
+def get_feature(sample, feature='mfcc', flatten=True):
     y, srate = sample
-    mfcc = librosa.feature.mfcc(y, sr=srate)
-    cqt = librosa.cqt(y, sr=srate)
-    spc = librosa.feature.spectral_centroid(y, sr=srate)
+    if feature == 'mfcc':
+        mfccs = librosa.feature.mfcc(y, sr=srate)
+        if flatten:
+            mfccs = np.mean(mfccs, axis=1)
+        return mfccs
+    elif feature == 'cqt': 
+        cqt = librosa.cqt(y, sr=srate)
+        if flatten:
+            cqt = np.mean(cqt, axis=1)
+        return cqt
+    elif feature == 'spc':
+        spc = librosa.feature.spectral_centroid(y, sr=srate)
+        return spc[0]
     
-    return [mfcc, cqt, spc]
+    return None
 
-def lpo_dataset(shuffle=True, limit=None, sample_dur=1):
+def lpo_dataset(shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_flatten=True):
     '''Generates training dataset using monophonic single-note instrument sound samples from 
     the London Philharmonic Orchestra (WAV).'''
     
@@ -40,12 +50,13 @@ def lpo_dataset(shuffle=True, limit=None, sample_dur=1):
             else:
                 y = y[0:srate * sample_dur]
                 
-            dataset.append([fn, get_features((y, srate)), label])
+            sample_feature = get_feature((y, srate), feature=feature, flatten=feature_flatten)
+            dataset.append([fn, sample_feature, label])
 
     return dataset
 
-def get_dataset(name='lpo', limit=None):
+def get_dataset(name='lpo', feature='mfcc', feature_flatten=True, limit=None):
     if name == 'lpo':
-        return lpo_dataset(limit=limit)
+        return lpo_dataset(limit=limit, feature=feature, feature_flatten=feature_flatten)
     
     return None
