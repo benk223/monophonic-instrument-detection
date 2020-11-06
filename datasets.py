@@ -2,8 +2,6 @@ import numpy as np
 import librosa
 import os
 
-data_dir = 'data'
-
 def get_feature(sample, feature='mfcc', flatten=True):
     y, srate = sample
     if feature == 'mfcc':
@@ -22,11 +20,7 @@ def get_feature(sample, feature='mfcc', flatten=True):
     
     return None
 
-def lpo_dataset(shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_flatten=True):
-    '''Generates training dataset using monophonic single-note instrument sound samples from 
-    the London Philharmonic Orchestra (WAV).'''
-    
-    samples_dir = f'{data_dir}/lpo_samples'
+def load_dataset(samples_dir='data/lpo_samples', shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_flatten=True):
     instruments = [item for item in os.listdir(samples_dir) if os.path.isdir(os.path.join(samples_dir, item))]
     fn_dict = {}
 
@@ -36,12 +30,12 @@ def lpo_dataset(shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_
         if limit and limit < len(filenames):
             filenames = filenames[0:limit]
             
-        fn_dict[instrument] = ['/'.join(fn.split('/')[-3:]) for fn in filenames]
+        fn_dict[instrument] = ['/'.join(fn.split('/')[-2:]) for fn in filenames]
             
     dataset = []
     for label, filenames in fn_dict.items():
         for fn in filenames:
-            y, srate = librosa.load(f'{data_dir}/{fn}')
+            y, srate = librosa.load(f'{samples_dir}/{fn}')
             # zero pad or slice to fit duration
             if len(y) < srate * sample_dur:
                 y = np.pad(y, (0, srate * sample_dur - len(y)), 'constant')
@@ -55,9 +49,3 @@ def lpo_dataset(shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_
         np.random.shuffle(dataset)
         
     return np.array(dataset)
-
-def get_dataset(name='lpo', feature='mfcc', feature_flatten=True, limit=None):
-    if name == 'lpo':
-        return lpo_dataset(limit=limit, feature=feature, feature_flatten=feature_flatten)
-    
-    return None
