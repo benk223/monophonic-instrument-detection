@@ -14,7 +14,7 @@ def get_feature(sample, feature='mfcc', flatten=True):
     elif feature == 'cqt': 
         cqt = librosa.cqt(y, sr=srate)
         if flatten:
-            cqt = np.mean(cqt, axis=1)
+            cqt = np.mean(np.abs(cqt), axis=1)
         return cqt
     elif feature == 'spc':
         spc = librosa.feature.spectral_centroid(y, sr=srate)
@@ -32,8 +32,6 @@ def lpo_dataset(shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_
 
     for instrument in instruments:
         filenames = librosa.util.find_files(f'{samples_dir}/{instrument}', ext=['wav'])
-        if shuffle:
-            np.random.shuffle(filenames)
             
         if limit and limit < len(filenames):
             filenames = filenames[0:limit]
@@ -53,7 +51,10 @@ def lpo_dataset(shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_
             sample_feature = get_feature((y, srate), feature=feature, flatten=feature_flatten)
             dataset.append([fn, sample_feature, label])
 
-    return dataset
+    if shuffle:
+        np.random.shuffle(dataset)
+        
+    return np.array(dataset)
 
 def get_dataset(name='lpo', feature='mfcc', feature_flatten=True, limit=None):
     if name == 'lpo':
