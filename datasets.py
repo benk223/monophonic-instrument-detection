@@ -20,7 +20,7 @@ def get_feature(sample, feature='mfcc', flatten=True):
     
     return None
 
-def load_dataset(samples_dir='data/lpo_samples', shuffle=True, limit=None, sample_dur=1, feature='mfcc', feature_flatten=True):
+def load_dataset(samples_dir='data/lpo_samples', shuffle=True, limit=None, sample_dur=100, feature='mfcc', feature_flatten=True):
     instruments = [item for item in os.listdir(samples_dir) if os.path.isdir(os.path.join(samples_dir, item))]
     fn_dict = {}
 
