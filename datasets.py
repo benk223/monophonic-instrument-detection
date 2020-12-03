@@ -2,6 +2,8 @@ import numpy as np
 import librosa
 import os
 
+from sklearn import preprocessing
+
 def get_feature(sample, feature='mfcc', flatten=True):
     y, srate = sample
     if feature == 'mfcc':
@@ -49,3 +51,16 @@ def load_dataset(samples_dir='data/lpo_samples', shuffle=True, limit=None, sampl
         np.random.shuffle(dataset)
         
     return np.array(dataset)
+
+def data_tuple(data, standardize=True, normalize=True):
+    filenames = np.array([a[0] for a in data])
+    features = np.array([a[1] for a in data])
+    labels = np.array([a[2] for a in data])
+    
+    if standardize:
+        features = (features - features.mean(0)) / features.std(0)
+        
+    if normalize:
+        features = preprocessing.normalize(features)
+
+    return (filenames, features, labels)
